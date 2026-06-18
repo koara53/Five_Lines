@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import './App.css'
 import { BattleLog } from './components/BattleLog'
 import { CardButton } from './components/CardButton'
+import { RulesModal } from './components/RulesModal'
 import {
   answerContract,
   createInitialGame,
@@ -125,6 +126,7 @@ function App() {
   const [openingAdvanced, setOpeningAdvanced] = useState(false)
   const [manualResultPending, setManualResultPending] = useState(false)
   const [selectedWager, setSelectedWager] = useState<Wager>(1)
+  const [isRulesOpen, setIsRulesOpen] = useState(false)
 
   const plannedCards = useMemo(
     () => createPlayerDeck(selectedTypes, game.setNumber),
@@ -386,10 +388,17 @@ function App() {
           <p className="eyebrow">Card mind game MVP</p>
           <h1>5手の嘘</h1>
         </div>
-        <button type="button" className="ghost-button" onClick={resetGame}>
-          Reset
-        </button>
+        <div className="header-actions">
+          <button type="button" className="ghost-button" onClick={() => setIsRulesOpen(true)}>
+            Rules
+          </button>
+          <button type="button" className="ghost-button" onClick={resetGame}>
+            Reset
+          </button>
+        </div>
       </header>
+
+      {isRulesOpen && <RulesModal onClose={() => setIsRulesOpen(false)} />}
 
       <CombatantPanel
         side="CPU"

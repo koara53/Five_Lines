@@ -1,73 +1,182 @@
-# React + TypeScript + Vite
+# 5手の嘘
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Viteで作られたブラウザカードゲームです。
 
-Currently, two official plugins are available:
+## 開発
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+# 5手の嘘 ルールブック
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 概要
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+「5手の嘘」は、5枚のカードを使って相手のHPとCreditを削り合う、短時間型の心理戦カードゲームです。
+
+勝負は5手で進行します。
+最初の3手はあらかじめ順番を決めて自動で公開され、残り2手は状況を見ながら手動で選びます。
+
+相手の行動を読み、攻撃を通し、契約を成功させ、最後まで生き残りましょう。
+
+## 勝利条件
+
+以下のどちらかを満たすと勝利です。
+
+- 相手のHPを0にする
+- 相手のCreditを0にする
+
+両者が同時にHP0、またはCredit0になった場合はDrawです。
+
+## 基本ステータス
+
+各プレイヤーは以下を持ちます。
+
+- HP: 5
+- Credit: 10
+
+HPは直接的な耐久力です。
+Creditは契約や賭けに使う資産です。
+
+## カード一覧
+
+### Attack
+
+相手に1ダメージを与えます。
+ただし、相手がGuardを出していた場合は無効化されます。
+
+### Guard
+
+相手のAttackを無効化します。
+相手がAttackを出していない場合は効果がありません。
+
+### Scout
+
+相手の残りカードを一部確認します。
+終盤の読み合いを有利にできます。
+
+### Disguise
+
+Attack、Guard、Healのいずれかとして使える偽装カードです。
+状況に応じて役割を変えられます。
+
+### Heal
+
+自分のHPを1回復します。
+ただし最大HPは5です。
+
+## 1セットの流れ
+
+1セットは5手で構成されます。
+
+### 1. デッキ選択
+
+5枚のカードを選びます。
+同じカードを複数選ぶこともできます。
+
+例:
+
+- Attack / Attack / Guard / Scout / Heal
+- Attack / Attack / Attack / Guard / Disguise
+- Guard / Guard / Attack / Heal / Disguise
+
+### 2. Opening 3
+
+選んだ5枚のうち、最初の3手をあらかじめ順番にセットします。
+
+この3手は開始後、自動で1枚ずつ公開されます。
+
+### 3. 1〜3手目
+
+予約したカードが1枚ずつ公開されます。
+結果を確認しながら「次のカードへ」で進みます。
+
+### 4. 4〜5手目
+
+残った2枚から、その場で出すカードを選びます。
+ここからは相手のHP、Credit、契約状況を見て判断できます。
+
+### 5. セット終了
+
+5手が終わると、契約の成否やCreditの変動が処理されます。
+まだ勝敗が決まらなければ、次のセットに進みます。
+
+## 契約
+
+セット開始時、契約を宣言できます。
+
+契約は「このセットで何を達成するか」を決める賭けです。
+成功すれば有利になりますが、失敗すると不利になります。
+
+### Assault
+
+条件: Attackを2回以上命中させる。
+
+攻撃型の契約です。
+相手がGuardを多く使うと失敗しやすくなります。
+
+### Defense
+
+条件: Guardで相手のAttackを1回以上防ぐ。
+
+防御型の契約です。
+相手がAttackを出してこない場合、成功できません。
+
+### Deception
+
+条件: Disguiseを1回以上使用する。
+
+偽装型の契約です。
+比較的成功しやすいですが、相手に読まれると対策されます。
+
+## Credit
+
+Creditは契約に使う資産です。
+
+Creditが0になると敗北します。
+HPだけでなく、Creditの残りにも注意する必要があります。
+
+大きく賭ければ大きく奪えますが、失敗すれば大きく失います。
+
+## Call / Fold
+
+相手が契約にCreditを賭けた場合、受けるか降りるかを選びます。
+
+### Call
+
+相手と同じCreditを賭けて契約勝負を受けます。
+相手の契約が失敗すれば、賭けられたCreditを奪えます。
+
+### Fold
+
+契約勝負を拒否します。
+その代わり、少量のCreditを失います。
+契約は実行されませんが、通常の5手勝負は続きます。
+
+## コツ
+
+### Attackを完全に捨てない
+
+勝つには相手のHPを削る必要があります。
+守りや偽装だけでは勝ち切れません。
+
+### 相手の契約を見る
+
+相手がAssaultを選んだなら、Attackを通そうとしている可能性が高いです。
+Guardを使うか、あえて攻撃を避けて契約失敗を狙いましょう。
+
+### Foldも選択肢
+
+高額な契約を無理に受ける必要はありません。
+相手の成功率が高そうなら、Foldして被害を抑えるのも手です。
+
+### 4〜5手目が勝負
+
+最初の3手は仕込みです。
+本当の読み合いは、残った2枚をどう使うかで決まります。
+
+### Credit差を意識する
+
+HPで勝っていても、Creditが少なければ危険です。
+逆にHPで不利でも、契約でCreditを奪えば逆転できます。
